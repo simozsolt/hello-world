@@ -28,6 +28,10 @@ func printPricelistRows(pricelistRows []PricelistRow) {
     fmt.Println("Pricelist rows:")
     for index, value := range pricelistRows {
         fmt.Printf("Index: %d, %+v\n", index, value)
+
+
+        fmt.Println("Length of struct: ", )
+
     }
 }
 
@@ -51,25 +55,40 @@ func resetDb(client *redis.Client) {
     client.Process(cmd)
 }
 
-func loadPricelist(client *redis.Client, pricelistId string, countryCode string, pricelistRows []PricelistRow) {
+/*func loadPricelist(client *redis.Client, pricelistId string, countryCode string, pricelistRows []PricelistRow) {
     fmt.Println("Load pricelist into Redis")
 
     hmset := func(client *redis.Client, key string, pricelistRow PricelistRow) *redis.StringCmd {
-/*        args := make([]string, 8)
+        //fmt.Printf("%+v", cmd)
+        //client.Process(cmd)
+        cmd := redis.NewStringCmd("hmset", key, "Prefix", pricelistRow.Prefix, "Rate", pricelistRow.Rate, "Description", pricelistRow.Description)
+        client.Process(cmd)
+        return cmd
+    }
+
+    for index, row := range pricelistRows {
+        fmt.Println("Insert:", index)
+        key := getKey(pricelistId, countryCode, row.Prefix)
+        _, err := hmset(client, key, row).Result()
+        if err != nil {
+            fmt.Println("Error on hmset")
+        }
+    }
+}*/
+
+func loadPricelist2(client *redis.Client, pricelistId string, countryCode string, pricelistRows []PricelistRow)  {
+    hmset := func(client *redis.Client, key string, pricelistRow PricelistRow) *redis.StatusCmd {
+        args := make([]interface{}, 8)
         args[0] = "hmset"
         args[1] = key
         args[2] = "Prefix"
         args[3] = pricelistRow.Prefix
         args[4] = "Rate"
-        args[5] = string(pricelistRow.Rate)
+        args[5] = pricelistRow.Rate
         args[6] = "Description"
         args[7] = pricelistRow.Description
 
-        cmd := redis.NewStatusCmd(args)
-*/
-        //fmt.Printf("%+v", cmd)
-        //client.Process(cmd)
-        cmd := redis.NewStringCmd("hmset", key, "Prefix", pricelistRow.Prefix, "Rate", pricelistRow.Rate, "Description", pricelistRow.Description)
+        cmd := redis.NewStatusCmd(args...)
         client.Process(cmd)
         return cmd
     }
@@ -91,7 +110,8 @@ func main() {
     pricelistRows := getPricelistRows()
     printPricelistRows(pricelistRows)
 
-    loadPricelist(client, "telekom", "hu", pricelistRows)
+    //loadPricelist(client, "telekom", "hu", pricelistRows)
+    loadPricelist2(client, "telekom", "hu", pricelistRows)
 
 /*
     Get := func(client *redis.Client, key string) *redis.StringCmd {
@@ -126,10 +146,7 @@ func main() {
 }
 
 /*
-init db
+https://github.com/go-redis/redis/blob/master/commands.go#L904
 
-set valami1 ertek1
-set valami2 ertek2
-hmset pricelists elso telekom masodik upc
-
+https://gobyexample.com/
  */
