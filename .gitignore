@@ -26,3 +26,7 @@ _testmain.go
 .idea
 /vendor/
 build/
+
+gts_nat.csv
+gts_nat_orig.csv
+gts_int.csv
