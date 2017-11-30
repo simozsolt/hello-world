@@ -44,18 +44,18 @@ func (p PricelistData) getKeyPricelistsCountryList() string {
 }
 
 func (p PricelistData) InsertToDb(c *redis.Client) {
-	sadd := func (client *redis.Client, key string, value string) *redis.IntCmd {
-	// sadd key value
-	// smembers key
-	var args []interface{}
-	args = append(args, "sadd")
-	args = append(args, key)
-	args = append(args, value)
+	sadd := func(client *redis.Client, key string, value string) *redis.IntCmd {
+		// sadd key value
+		// smembers key
+		var args []interface{}
+		args = append(args, "sadd")
+		args = append(args, key)
+		args = append(args, value)
 
-	cmd := redis.NewIntCmd(args...)
-	c.Process(cmd)
-	return cmd
-}
+		cmd := redis.NewIntCmd(args...)
+		c.Process(cmd)
+		return cmd
+	}
 
 	hmset := func(client *redis.Client, key string, pricelistRow PricelistRow) *redis.StatusCmd {
 		// hmset key keyVal1 val keyVal2 val2
