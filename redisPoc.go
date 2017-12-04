@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis"
 	"github.com/simozsolt/hello-world/redisPoc"
+	"log"
 )
 
 func getClient(host string, pwd string, db int) *redis.Client {
@@ -26,13 +27,19 @@ func main() {
 	resetDb(client)
 
 	filePath := "/home/simo/Work/go/src/github.com/simozsolt/hello-world/gts_nat.csv"
-	pData := redisPoc.GetPricelistRowsFromCsv(filePath, "gts_nat")
+	pData, error := redisPoc.GetPricelistRowsFromCsv(filePath, "gts_nat")
+	if error != nil {
+		log.Fatal(error)
+	}
 	fmt.Printf("%s \n", pData)
 
 	pData.InsertToDb(client)
 
 	filePath2 := "/home/simo/Work/go/src/github.com/simozsolt/hello-world/gts_int.csv"
-	pData2 := redisPoc.GetPricelistRowsFromCsv(filePath2, "gts_int")
+	pData2, error2 := redisPoc.GetPricelistRowsFromCsv(filePath2, "gts_int")
+	if error2 != nil {
+		log.Fatal(error)
+	}
 	fmt.Printf("%s \n", pData2)
 
 	pData2.InsertToDb(client)

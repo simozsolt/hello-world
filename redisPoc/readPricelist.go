@@ -26,12 +26,17 @@ import (
 //	return pData
 //}
 
-func GetPricelistRowsFromCsv(filePath string, pricelistId string) PricelistData {
+func GetPricelistRowsFromCsv(filePath string, pricelistId string) (PricelistData, error) {
 	pData := PricelistData{
 		PricelistId: pricelistId,
 	}
 
-	f, _ := os.Open(filePath)
+	f, e := os.Open(filePath)
+	if e != nil {
+		return pData, e
+	}
+	defer f.Close()
+
 	r := csv.NewReader(bufio.NewReader(f))
 	r.Comma = ';'
 
@@ -44,7 +49,7 @@ func GetPricelistRowsFromCsv(filePath string, pricelistId string) PricelistData 
 			break
 		}
 		if err != nil {
-			log.Fatal(err)
+			return pData, err
 		}
 
 		// todo check required fields: prefix, rate ...
@@ -81,5 +86,5 @@ func GetPricelistRowsFromCsv(filePath string, pricelistId string) PricelistData 
 			})
 	}
 
-	return pData
+	return pData, nil
 }
