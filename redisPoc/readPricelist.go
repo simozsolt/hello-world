@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/csv"
 	"io"
-	"log"
 	"os"
 	"strconv"
 	"strings"
