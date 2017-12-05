@@ -1,15 +1,22 @@
 package main
 
 import (
-	"github.com/simozsolt/hello-world/redisPoc"
 	"fmt"
+	"os"
 )
 
 
 
 func main() {
-	filePath := "/home/simo/Work/go/src/github.com/simozsolt/hello-world/gts_nat.csv"
+	fmt.Println("Test")
+	fmt.Println(os.Args[0])
+	skip := false
+	if len(os.Args) > 1 && os.Args[1] == "skip" {
+		fmt.Printf("%T %+v\n", os.Args[1],os.Args[1])
+		skip = true
+	}
 
-	pData := redisPoc.GetPricelistRowsFromCsv(filePath)
-	fmt.Printf("%s\n", pData)
+	fmt.Printf("%T %+v\n", skip, skip)
+
+
 }
