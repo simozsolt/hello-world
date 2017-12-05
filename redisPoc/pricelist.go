@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis"
 	"strings"
+	"time"
 )
 
 type PricelistRow struct {
@@ -99,5 +100,47 @@ func (p PricelistData) InsertToDb(c *redis.Client) {
 		if err != nil {
 			fmt.Println("Error on add country to pricelists country list")
 		}
+	}
+}
+
+func LookUp(client *redis.Client, pricelistId string, countryCode string, prefix string, searchLength int) {
+	hGetAll := func(client *redis.Client, key string) *redis.StringStringMapCmd {
+		cmd := redis.NewStringStringMapCmd("hgetall", key)
+		client.Process(cmd)
+		return cmd
+	}
+
+	pData := PricelistData{
+		PricelistId: pricelistId,
+	}
+
+	actualPrefix := ""
+	for searchLength > 0 {
+		runes := []rune(prefix)
+		actualPrefix = string(runes[0:searchLength])
+
+		key := pData.getKey(actualPrefix, countryCode)
+
+		startTime := time.Now()
+		v, err := hGetAll(client, key).Result()
+		endTime := time.Now()
+		delta := endTime.Sub(startTime)
+		//deltaSec := float64(delta)/1000000
+
+		// 1 sec = 1 000 000 microsec
+		fmt.Printf("Actual Prefix: %s; length: %d; QueryTime: %s", actualPrefix, searchLength, delta)
+		fmt.Printf("Key: %s\n", key)
+
+		if err != nil {
+			fmt.Printf("Error: %+v\n", err)
+		}
+		if len(v) > 0 {
+			fmt.Printf("Result: %+v\n", v)
+			searchLength = 0
+		} else {
+			fmt.Printf("Not found\n\n")
+		}
+
+		searchLength--
 	}
 }

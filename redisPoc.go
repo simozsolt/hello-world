@@ -7,8 +7,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"strings"
-	"time"
 )
 
 func getClient(host string, pwd string, db int) *redis.Client {
@@ -76,41 +74,7 @@ func main() {
 		resetDbProcess(client)
 	}
 
-	hGetAll := func(client *redis.Client, key string) *redis.StringStringMapCmd {
-		cmd := redis.NewStringStringMapCmd("hgetall", key)
-		client.Process(cmd)
-		return cmd
-	}
-
-	actualPrefix := ""
-	length := searchLength
-	for length > 0 {
-		runes := []rune(prefix)
-		actualPrefix = string(runes[0:length])
-
-		keyParts := []string{"pricelists:gts_nat/countries:hu/", actualPrefix}
-		key := strings.Join(keyParts, "")
-
-		startTime := time.Now()
-		v, err := hGetAll(client, key).Result()
-		endTime := time.Now()
-		delta := endTime.Sub(startTime)
-
-		fmt.Printf("Actual Prefix: %s; length: %d; QueryTime: %s\n", actualPrefix, length, delta)
-		fmt.Printf("Key: %s\n", key)
-
-		if err != nil {
-			fmt.Printf("Error: %+v\n", err)
-		}
-		if len(v) > 0 {
-			fmt.Printf("Result: %+v\n", v)
-			length = 0
-		} else {
-			fmt.Printf("Not found\n\n")
-		}
-
-		length--
-	}
+	redisPoc.LookUp(client, "gts_nat", "hu", prefix, searchLength)
 }
 
 /*
