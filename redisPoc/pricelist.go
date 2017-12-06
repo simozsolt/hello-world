@@ -5,6 +5,8 @@ import (
 	"github.com/go-redis/redis"
 	"strings"
 	"time"
+	"log"
+	"errors"
 )
 
 type PricelistRow struct {
@@ -85,25 +87,25 @@ func (p PricelistData) InsertToDb(c *redis.Client) {
 
 	_, err := sadd(c, "pricelists", p.PricelistId).Result()
 	if err != nil {
-		fmt.Println("Error on add pricelistId to pricelists list")
+		log.Println("Error on add pricelistId to pricelists list")
 	}
 
 	for _, row := range p.Data {
 		key := p.getKey(row.Prefix, row.CountryCode)
 		_, err := hmset(c, key, row).Result()
 		if err != nil {
-			fmt.Println("Error on hmset")
+			log.Println("Error on hmset")
 		}
 
 		key2 := p.getKeyPricelistsCountryList()
 		_, err = sadd(c, key2, row.CountryCode).Result()
 		if err != nil {
-			fmt.Println("Error on add country to pricelists country list")
+			log.Println("Error on add country to pricelists country list")
 		}
 	}
 }
 
-func LookUp(client *redis.Client, pricelistId string, countryCode string, prefix string, searchLength int) {
+func LookUp(client *redis.Client, pricelistId string, countryCode string, prefix string, searchLength int) (error) {
 	hGetAll := func(client *redis.Client, key string) *redis.StringStringMapCmd {
 		cmd := redis.NewStringStringMapCmd("hgetall", key)
 		client.Process(cmd)
@@ -123,24 +125,26 @@ func LookUp(client *redis.Client, pricelistId string, countryCode string, prefix
 
 		startTime := time.Now()
 		v, err := hGetAll(client, key).Result()
-		endTime := time.Now()
-		delta := endTime.Sub(startTime)
-		//deltaSec := float64(delta)/1000000
+		delta := time.Since(startTime)
 
 		// 1 sec = 1 000 000 microsec
-		fmt.Printf("Actual Prefix: %s; length: %d; QueryTime: %s", actualPrefix, searchLength, delta)
-		fmt.Printf("Key: %s\n", key)
+		log.Printf("Actual Prefix: %s; length: %d; QueryTime: %s\n", actualPrefix, searchLength, delta)
+
+		log.Printf("%f query/sec\n", 1/delta.Seconds())
+		log.Printf("Key: %s\n", key)
 
 		if err != nil {
-			fmt.Printf("Error: %+v\n", err)
+			return errors.New(fmt.Sprintf("Error: %+v\n", err))
 		}
 		if len(v) > 0 {
-			fmt.Printf("Result: %+v\n", v)
-			searchLength = 0
+			log.Printf("Result: %+v\n", v)
+			break
 		} else {
-			fmt.Printf("Not found\n\n")
+			log.Printf("Not found\n\n")
 		}
 
 		searchLength--
 	}
+
+	return nil
 }

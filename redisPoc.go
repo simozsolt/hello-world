@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/go-redis/redis"
 	"github.com/simozsolt/hello-world/redisPoc"
 	"log"
@@ -32,8 +31,8 @@ func resetDbProcess(client *redis.Client) {
 	if error != nil {
 		log.Fatal(error)
 	}
-	fmt.Printf("PricelistId: %s; RowCount: %d\n", pData.PricelistId, len(pData.Data))
-	//fmt.Printf("%s \n", pData)
+	log.Printf("PricelistId: %s; RowCount: %d\n", pData.PricelistId, len(pData.Data))
+	//log.Printf("%s \n", pData)
 
 	pData.InsertToDb(client)
 
@@ -42,8 +41,8 @@ func resetDbProcess(client *redis.Client) {
 	if error2 != nil {
 		log.Fatal(error)
 	}
-	fmt.Printf("PricelistId: %s; RowCount: %d\n", pData2.PricelistId, len(pData2.Data))
-	//fmt.Printf("%s \n", pData2)
+	log.Printf("PricelistId: %s; RowCount: %d\n", pData2.PricelistId, len(pData2.Data))
+	//log.Printf("%s \n", pData2)
 
 	pData2.InsertToDb(client)
 }
@@ -62,19 +61,23 @@ func getArgs() (resetDbParam bool, prefix string, searchLength int) {
 
 func main() {
 	if len(os.Args) != 4 {
-		fmt.Println("Required params: resetDb(true|false) prefix(phoneNr) searchLength(int)")
+		log.Println("Required params: resetDb(true|false) prefix(phoneNr) searchLength(int)")
 		return
 	}
 
 	resetDbParam, prefix, searchLength := getArgs()
-	fmt.Printf("ResetDb: %+v; Prefix: %s; SearchLength: %d\n", resetDbParam, prefix, searchLength)
+	log.Printf("ResetDb: %+v; Prefix: %s; SearchLength: %d\n", resetDbParam, prefix, searchLength)
 
 	client := getClient("localhost:6379", "", 0)
 	if resetDbParam {
 		resetDbProcess(client)
 	}
 
-	redisPoc.LookUp(client, "gts_nat", "hu", prefix, searchLength)
+	//todo read about Context struct
+	err := redisPoc.LookUp(client, "gts_nat", "hu", prefix, searchLength)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 /*
