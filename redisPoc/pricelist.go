@@ -37,13 +37,15 @@ func (pData PricelistData) String() string {
 }
 
 func (p PricelistData) getKey(prefix string, countryCode string) string {
-	s := []string{"pricelists:", p.PricelistId, "/countries:", countryCode, "/", prefix}
-	return strings.Join(s, "")
+	return "pricelists:" + p.PricelistId + "/countries:" + countryCode + "/" + prefix
+	//s := []string{"pricelists:", p.PricelistId, "/countries:", countryCode, "/", prefix}
+	//return strings.Join(s, "")
 }
 
 func (p PricelistData) getKeyPricelistsCountryList() string {
-	s := []string{"pricelists:", p.PricelistId, "/countries"}
-	return strings.Join(s, "")
+	return "pricelists:" + p.PricelistId + "/countries"
+	//s := []string{"pricelists:", p.PricelistId, "/countries"}
+	//return strings.Join(s, "")
 }
 
 func (p PricelistData) InsertToDb(c *redis.Client) {
